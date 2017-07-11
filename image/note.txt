@@ -1,0 +1,50 @@
+0.alli  支付回调  H5下
+	
+checkOrdersStatus(String payIds) 
+  根据订单号查找订单
+order.getKStatus()：K_STSTUS_DEFAULT||K_CON_ERROR  // 如果订单状态是初始订单或者是网络连接有问题状态，返回不知道st.setStatus(3);
+		    K_STSTUS_SUCCESS  //// 如果订单已经成功，直接返回订单状态st.setStatus(1);
+	            else//// 订单已经失败，直接返回订单状态st.setStatus(2);
+		statusret.add(st);
+		JSONArray arr = JSONArray.fromObject(statusret)
+  
+1.tencentY  回调无
+
+2.ios   RSA
+	请求：iosServlet
+	过滤"com.kongzhong.nuomena.ios.d1cn"
+	存订单的前处理cburl对包名是hongdian的处理   cburl是passport-stage换成passport
+							   passport-temp换成passport-stage
+
+	IapppayServlet:cburl不过滤
+
+	回调：IapppayCbServlet
+		transdata+sign+signtype
+		验证签名
+		获取更新订单信息  transid   没做callback的更新
+
+
+
+3.google
+	回调无
+	GoogleServlet生成订单
+
+
+4.微信  weixinservlet   weixincbservlet
+        请求：1.生成商户订单
+		servlet-->charge-->order
+	2.checkOrdersStatus(payIds)
+	 根据订单号查找订单
+	order.getKStatus()：K_STSTUS_DEFAULT||K_CON_ERROR  // 如果订单状态是初始订单或者是网络连接有问题状态，返回不知道st.setStatus(3);
+							   //如果超时了，当前时间-订单时间>ORDER_TIMEOUT  st.setStatus(4);				
+		    K_STSTUS_SUCCESS  //// 如果订单已经成功，直接返回订单状态st.setStatus(1);
+	            else//// 订单已经失败，直接返回订单状态st.setStatus(2);
+		statusret.add(st);
+		JSONArray arr = JSONArray.fromObject(statusret)
+
+	回调：
+		没有做签名的认证，没有更新callback
+		更新完订单信息后，将参数存到文件里面
+			OSUtil.makeDirs(path);
+			String filename = path + "/" + weixinparams.getOut_trade_no();
+			OSUtil.saveFile(filename, weixinparams.toString());
